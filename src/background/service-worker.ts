@@ -46,6 +46,14 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   }
 });
 
+chrome.tabs.onActivated.addListener(async ({ tabId }) => {
+  const tab = await chrome.tabs.get(tabId);
+  if (!tab.url) return;
+  // タブがアクティブになったらタイマーをリセット
+  await chrome.alarms.clear(`${ALARM_PREFIX}${tabId}`);
+  await processTab(tabId, tab.url);
+});
+
 chrome.tabs.onRemoved.addListener(async (tabId) => {
   await chrome.alarms.clear(`${ALARM_PREFIX}${tabId}`);
 });
