@@ -40,7 +40,7 @@ Vite の HMR（Hot Module Replacement）が有効になる。変更のたびに 
 
 ## ルールの設定例
 
-| パターン | タイプ | 説明 |
+| 入力するパターン文字列 | タイプ | 説明 |
 |---|---|---|
 | `*://github.com/**` | glob | GitHub のすべてのページ |
 | `*://linear.app/**` | glob | Linear のすべてのページ |
