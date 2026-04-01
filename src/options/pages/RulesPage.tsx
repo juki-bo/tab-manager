@@ -133,13 +133,13 @@ export default function RulesPage() {
             </div>
 
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-medium text-sm text-gray-900">{rule.name || "無名ルール"}</span>
-                <code className="text-xs text-gray-500 bg-gray-50 px-1.5 py-0.5 rounded truncate max-w-xs">
-                  {rule.pattern}
-                </code>
                 <span className="text-xs text-gray-400">{rule.patternType}</span>
               </div>
+              <code className="text-xs text-gray-600 bg-gray-50 px-2 py-1 rounded block mt-0.5 break-all">
+                {rule.pattern}
+              </code>
               <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
                 {rule.targetGroupName && (
                   <span className="flex items-center gap-1">
@@ -198,23 +198,23 @@ export default function RulesPage() {
               </Field>
 
               <Field label="パターン">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={editing.pattern}
-                    onChange={(e) => setEditing({ ...editing, pattern: e.target.value })}
-                    placeholder="例: *://github.com/**"
-                    className={`${INPUT} flex-1`}
-                  />
+                <div className="flex gap-2 mb-2">
                   <select
                     value={editing.patternType}
                     onChange={(e) => setEditing({ ...editing, patternType: e.target.value as PatternType })}
-                    className={`${INPUT} w-28`}
+                    className={`${INPUT} w-24 shrink-0`}
                   >
                     <option value="glob">glob</option>
                     <option value="regex">regex</option>
                   </select>
                 </div>
+                <input
+                  type="text"
+                  value={editing.pattern}
+                  onChange={(e) => setEditing({ ...editing, pattern: e.target.value })}
+                  placeholder="例: *://github.com/**"
+                  className={`${INPUT} font-mono`}
+                />
               </Field>
 
               <Field label="テスト URL">
