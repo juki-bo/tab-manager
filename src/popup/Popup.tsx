@@ -10,11 +10,21 @@ export default function Popup() {
     getStorage().then(setData);
   }, []);
 
-  const openOptions = (tab?: string) => {
-    const url = tab
-      ? chrome.runtime.getURL(`src/options/index.html#${tab}`)
-      : chrome.runtime.getURL("src/options/index.html");
-    chrome.tabs.create({ url });
+  const openOptions = async (tab?: string) => {
+    const optionsBase = chrome.runtime.getURL("src/options/index.html");
+    const existing = await chrome.tabs.query({ url: `${optionsBase}*` });
+    if (existing.length > 0 && existing[0].id != null) {
+      await chrome.tabs.update(existing[0].id, { active: true });
+      if (existing[0].windowId != null) {
+        await chrome.windows.update(existing[0].windowId, { focused: true });
+      }
+      if (tab) {
+        await chrome.tabs.sendMessage(existing[0].id, { type: "navigate", tab });
+      }
+    } else {
+      const url = tab ? `${optionsBase}#${tab}` : optionsBase;
+      await chrome.tabs.create({ url });
+    }
     window.close();
   };
 

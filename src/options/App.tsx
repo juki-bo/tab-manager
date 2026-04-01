@@ -20,6 +20,14 @@ export default function App() {
     if (hash && TABS.some((t) => t.id === hash)) {
       setActiveTab(hash);
     }
+
+    const listener = (message: { type: string; tab: string }) => {
+      if (message.type === "navigate" && TABS.some((t) => t.id === message.tab)) {
+        setActiveTab(message.tab as Tab);
+      }
+    };
+    chrome.runtime.onMessage.addListener(listener);
+    return () => chrome.runtime.onMessage.removeListener(listener);
   }, []);
 
   return (

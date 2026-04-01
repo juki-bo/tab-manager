@@ -94,15 +94,22 @@ async function applyRule(tabId: number, rule: SortRule): Promise<void> {
 
   if (rule.targetGroupName) {
     try {
-      const tab = await chrome.tabs.get(tabId);
-      const windowId = tab.windowId;
-      const groups = await chrome.tabGroups.query({ windowId, title: rule.targetGroupName });
+      // 全ウィンドウから同名グループを探す（重複グループを作らないため）
+      const allGroups = await chrome.tabGroups.query({ title: rule.targetGroupName });
 
       let groupId: number;
-      if (groups.length > 0) {
-        groupId = groups[0].id;
+      if (allGroups.length > 0) {
+        // 既存グループが見つかったらそのウィンドウにタブを移動してから追加
+        const existingGroup = allGroups[0];
+        if (rule.targetWindowId == null) {
+          // windowId 指定がない場合のみ、グループのあるウィンドウへ追従
+          await chrome.tabs.move(tabId, { windowId: existingGroup.windowId, index: -1 });
+        }
+        groupId = existingGroup.id;
       } else {
-        groupId = await chrome.tabs.group({ tabIds: tabId, createProperties: { windowId } });
+        // どのウィンドウにも存在しない場合は現在のウィンドウに新規作成
+        const tab = await chrome.tabs.get(tabId);
+        groupId = await chrome.tabs.group({ tabIds: tabId, createProperties: { windowId: tab.windowId } });
         await chrome.tabGroups.update(groupId, {
           title: rule.targetGroupName,
           color: rule.targetGroupColor ?? "grey",
