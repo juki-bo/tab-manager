@@ -24,15 +24,15 @@ export default function GlobalSettingsPage() {
 
       <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
         <SettingRow
-          label="自動クローズ時間（分）"
+          label="自動クローズ時間（時間）"
           description="タブが開かれてから自動で閉じるまでの時間。0 で無効。ルールに個別設定がある場合はそちらが優先されます。"
         >
           <input
             type="number"
             min={0}
-            value={settings.autoCloseMinutes}
+            value={settings.autoCloseHours}
             onChange={(e) =>
-              setSettings({ ...settings, autoCloseMinutes: parseInt(e.target.value) || 0 })
+              setSettings({ ...settings, autoCloseHours: parseInt(e.target.value) || 0 })
             }
             className="border border-gray-200 rounded-lg px-3 py-2 text-sm w-28 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />

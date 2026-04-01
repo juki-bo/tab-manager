@@ -75,10 +75,10 @@ async function processTab(tabId: number, url: string): Promise<void> {
     await applyRule(tabId, rule);
   }
 
-  const closeMinutes = rule?.autoCloseMinutes ?? globalSettings.autoCloseMinutes;
-  if (closeMinutes > 0) {
+  const closeHours = rule?.autoCloseHours ?? globalSettings.autoCloseHours;
+  if (closeHours > 0) {
     await chrome.alarms.create(`${ALARM_PREFIX}${tabId}`, {
-      delayInMinutes: closeMinutes,
+      delayInMinutes: closeHours * 60,
     });
   }
 }

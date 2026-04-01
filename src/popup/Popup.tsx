@@ -29,7 +29,7 @@ export default function Popup() {
   };
 
   const activeRules = data?.rules.filter((r) => r.enabled).length ?? 0;
-  const autoClose = data?.globalSettings.autoCloseMinutes ?? 0;
+  const autoClose = data?.globalSettings.autoCloseHours ?? 0;
   const historyCount = data?.closedTabs.length ?? 0;
 
   return (
@@ -47,7 +47,7 @@ export default function Popup() {
         <div className="flex justify-between text-sm">
           <span className="text-gray-500">自動クローズ</span>
           <span className="font-medium text-gray-800">
-            {autoClose > 0 ? `${autoClose} 分` : "無効"}
+            {autoClose > 0 ? `${autoClose} 時間` : "無効"}
           </span>
         </div>
         <div className="flex justify-between text-sm">

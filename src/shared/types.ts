@@ -10,11 +10,11 @@ export interface SortRule {
   targetWindowId?: number;
   targetGroupName?: string;
   targetGroupColor?: chrome.tabGroups.ColorEnum;
-  autoCloseMinutes?: number;
+  autoCloseHours?: number;
 }
 
 export interface GlobalSettings {
-  autoCloseMinutes: number;
+  autoCloseHours: number;
   maxHistoryEntries: number;
 }
 
@@ -34,7 +34,7 @@ export interface StorageData {
 }
 
 export const DEFAULT_SETTINGS: GlobalSettings = {
-  autoCloseMinutes: 0,
+  autoCloseHours: 0,
   maxHistoryEntries: 200,
 };
 

@@ -29,7 +29,7 @@ const BLANK_RULE: Omit<SortRule, "id" | "priority"> = {
   targetWindowId: undefined,
   targetGroupName: "",
   targetGroupColor: "grey",
-  autoCloseMinutes: undefined,
+  autoCloseHours: undefined,
 };
 
 export default function RulesPage() {
@@ -150,10 +150,10 @@ export default function RulesPage() {
                 {rule.targetWindowId != null && (
                   <span>ウィンドウ: {rule.targetWindowId}</span>
                 )}
-                {(rule.autoCloseMinutes ?? 0) > 0 && (
-                  <span>自動クローズ: {rule.autoCloseMinutes} 分</span>
+                {(rule.autoCloseHours ?? 0) > 0 && (
+                  <span>自動クローズ: {rule.autoCloseHours} 時間</span>
                 )}
-                {(rule.autoCloseMinutes ?? 0) === 0 && !rule.targetGroupName && !rule.targetWindowId && (
+                {(rule.autoCloseHours ?? 0) === 0 && !rule.targetGroupName && !rule.targetWindowId && (
                   <span className="text-gray-300">振り分け先なし</span>
                 )}
               </div>
@@ -282,15 +282,15 @@ export default function RulesPage() {
                 </Field>
               )}
 
-              <Field label="自動クローズ（分、0で無効）">
+              <Field label="自動クローズ（時間、0で無効）">
                 <input
                   type="number"
                   min={0}
-                  value={editing.autoCloseMinutes ?? ""}
+                  value={editing.autoCloseHours ?? ""}
                   onChange={(e) =>
                     setEditing({
                       ...editing,
-                      autoCloseMinutes: e.target.value ? parseInt(e.target.value) : undefined,
+                      autoCloseHours: e.target.value ? parseInt(e.target.value) : undefined,
                     })
                   }
                   placeholder="グローバル設定を使用"
