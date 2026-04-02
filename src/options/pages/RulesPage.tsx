@@ -34,6 +34,7 @@ const BLANK_RULE: Omit<SortRule, "id" | "priority"> = {
 export default function RulesPage() {
   const [rules, setRulesState] = useState<SortRule[]>([]);
   const [editing, setEditing] = useState<SortRule | null>(null);
+  const [savedEditing, setSavedEditing] = useState<SortRule | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [windows, setWindows] = useState<WindowInfo[]>([]);
   const [testUrl, setTestUrl] = useState("");
@@ -52,20 +53,34 @@ export default function RulesPage() {
     setRulesState(reindexed);
   };
 
+  const isDirty = () => {
+    if (!editing || !savedEditing) return false;
+    return JSON.stringify(editing) !== JSON.stringify(savedEditing);
+  };
+
   const openNew = () => {
-    setEditing({ ...BLANK_RULE, id: crypto.randomUUID(), priority: rules.length });
+    const blank = { ...BLANK_RULE, id: crypto.randomUUID(), priority: rules.length };
+    setEditing(blank);
+    setSavedEditing(blank);
     setIsNew(true);
   };
 
   const openEdit = (rule: SortRule) => {
     setEditing({ ...rule });
+    setSavedEditing({ ...rule });
     setIsNew(false);
   };
 
   const closeEditor = () => {
     setEditing(null);
+    setSavedEditing(null);
     setTestUrl("");
     setPatternInput("");
+  };
+
+  const tryClose = () => {
+    if (isDirty() && !window.confirm("編集中の内容が破棄されます。閉じますか？")) return;
+    closeEditor();
   };
 
   const saveEdit = async () => {
@@ -193,8 +208,8 @@ export default function RulesPage() {
 
       {/* Editor Modal */}
       {editing && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" onClick={tryClose}>
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="px-6 py-4 border-b border-gray-100">
               <h2 className="font-semibold text-gray-900">
                 {isNew ? "ルールを追加" : "ルールを編集"}
@@ -327,7 +342,7 @@ export default function RulesPage() {
             </div>
 
             <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-2">
-              <button onClick={closeEditor} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors">
+              <button onClick={tryClose} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors">
                 キャンセル
               </button>
               <button
