@@ -1,0 +1,1 @@
+function i(n){try{return new URL(n).hostname}catch{return n}}function a(n,r){const e=i(n);return r.patterns.some(t=>t.length>0&&e.includes(t))}function c(n,r){return[...r].filter(t=>t.enabled).sort((t,o)=>t.priority-o.priority).find(t=>a(n,t))??null}export{c as f,a as m};

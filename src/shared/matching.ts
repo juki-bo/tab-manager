@@ -1,23 +1,16 @@
 import type { SortRule } from "./types";
 
-function globToRegex(glob: string): RegExp {
-  const escaped = glob
-    .replace(/[.+^${}()|[\]\\]/g, "\\$&")
-    .replace(/\*\*/g, "§DOUBLE§")
-    .replace(/\*/g, "[^/]*")
-    .replace(/\?/g, ".")
-    .replace(/§DOUBLE§/g, ".*");
-  return new RegExp(`^${escaped}$`);
+function extractDomain(url: string): string {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url;
+  }
 }
 
 export function matchPattern(url: string, rule: SortRule): boolean {
-  try {
-    const regex =
-      rule.patternType === "regex" ? new RegExp(rule.pattern) : globToRegex(rule.pattern);
-    return regex.test(url);
-  } catch {
-    return false;
-  }
+  const domain = extractDomain(url);
+  return rule.patterns.some((p) => p.length > 0 && domain.includes(p));
 }
 
 export function findMatchingRule(url: string, rules: SortRule[]): SortRule | null {

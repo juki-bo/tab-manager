@@ -1,11 +1,8 @@
-export type PatternType = "glob" | "regex";
-
 export interface SortRule {
   id: string;
   enabled: boolean;
   name: string;
-  pattern: string;
-  patternType: PatternType;
+  patterns: string[];
   priority: number;
   targetWindowId?: number;
   targetGroupName?: string;

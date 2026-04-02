@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Plus, Pencil, Trash2, ChevronUp, ChevronDown, ToggleLeft, ToggleRight } from "lucide-react";
+import { Plus, Pencil, Trash2, ChevronUp, ChevronDown, ToggleLeft, ToggleRight, X } from "lucide-react";
 import { getRules, setRules } from "@/shared/storage";
 import { matchPattern } from "@/shared/matching";
-import type { SortRule, PatternType } from "@/shared/types";
+import type { SortRule } from "@/shared/types";
 
 const GROUP_COLORS: chrome.tabGroups.ColorEnum[] = [
   "grey", "blue", "red", "yellow", "green", "pink", "purple", "cyan", "orange",
@@ -24,8 +24,7 @@ type WindowInfo = { id: number; label: string };
 const BLANK_RULE: Omit<SortRule, "id" | "priority"> = {
   enabled: true,
   name: "",
-  pattern: "",
-  patternType: "glob",
+  patterns: [],
   targetWindowId: undefined,
   targetGroupName: "",
   targetGroupColor: "grey",
@@ -38,6 +37,7 @@ export default function RulesPage() {
   const [isNew, setIsNew] = useState(false);
   const [windows, setWindows] = useState<WindowInfo[]>([]);
   const [testUrl, setTestUrl] = useState("");
+  const [patternInput, setPatternInput] = useState("");
 
   useEffect(() => {
     getRules().then((r) => setRulesState(r.sort((a, b) => a.priority - b.priority)));
@@ -65,6 +65,7 @@ export default function RulesPage() {
   const closeEditor = () => {
     setEditing(null);
     setTestUrl("");
+    setPatternInput("");
   };
 
   const saveEdit = async () => {
@@ -92,9 +93,20 @@ export default function RulesPage() {
     await save(next);
   };
 
-  const testMatch = editing
-    ? matchPattern(testUrl, editing)
-    : false;
+  const addPattern = () => {
+    if (!editing) return;
+    const trimmed = patternInput.trim();
+    if (!trimmed || editing.patterns.includes(trimmed)) return;
+    setEditing({ ...editing, patterns: [...editing.patterns, trimmed] });
+    setPatternInput("");
+  };
+
+  const removePattern = (p: string) => {
+    if (!editing) return;
+    setEditing({ ...editing, patterns: editing.patterns.filter((x) => x !== p) });
+  };
+
+  const testMatch = editing ? matchPattern(testUrl, editing) : false;
 
   return (
     <div>
@@ -135,11 +147,14 @@ export default function RulesPage() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-medium text-sm text-gray-900">{rule.name || "無名ルール"}</span>
-                <span className="text-xs text-gray-400">{rule.patternType}</span>
               </div>
-              <code className="text-xs text-gray-600 bg-gray-50 px-2 py-1 rounded block mt-0.5 break-all">
-                {rule.pattern}
-              </code>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {rule.patterns.length > 0 ? rule.patterns.map((p) => (
+                  <span key={p} className="text-xs text-gray-600 bg-gray-50 border border-gray-200 px-2 py-0.5 rounded-full">{p}</span>
+                )) : (
+                  <span className="text-xs text-gray-300">（パターンなし）</span>
+                )}
+              </div>
               <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
                 {rule.targetGroupName && (
                   <span className="flex items-center gap-1">
@@ -197,24 +212,36 @@ export default function RulesPage() {
                 />
               </Field>
 
-              <Field label="パターン">
+              <Field label="ドメインパターン（部分一致、複数登録可）">
                 <div className="flex gap-2 mb-2">
-                  <select
-                    value={editing.patternType}
-                    onChange={(e) => setEditing({ ...editing, patternType: e.target.value as PatternType })}
-                    className={`${INPUT} w-24 shrink-0`}
+                  <input
+                    type="text"
+                    value={patternInput}
+                    onChange={(e) => setPatternInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addPattern(); } }}
+                    placeholder="例: github.com"
+                    className={`${INPUT} flex-1`}
+                  />
+                  <button
+                    onClick={addPattern}
+                    disabled={!patternInput.trim()}
+                    className="px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors shrink-0"
                   >
-                    <option value="glob">glob</option>
-                    <option value="regex">regex</option>
-                  </select>
+                    追加
+                  </button>
                 </div>
-                <input
-                  type="text"
-                  value={editing.pattern}
-                  onChange={(e) => setEditing({ ...editing, pattern: e.target.value })}
-                  placeholder="例: *://github.com/**"
-                  className={`${INPUT} font-mono`}
-                />
+                {editing.patterns.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {editing.patterns.map((p) => (
+                      <span key={p} className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-full">
+                        {p}
+                        <button onClick={() => removePattern(p)} className="hover:text-red-500 leading-none">
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </Field>
 
               <Field label="テスト URL">
@@ -305,7 +332,7 @@ export default function RulesPage() {
               </button>
               <button
                 onClick={saveEdit}
-                disabled={!editing.pattern}
+                disabled={editing.patterns.length === 0}
                 className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
               >
                 保存

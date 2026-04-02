@@ -12,7 +12,15 @@ export async function getStorage(): Promise<StorageData> {
 
 export async function getRules(): Promise<SortRule[]> {
   const data = await chrome.storage.local.get("rules");
-  return data.rules ?? [];
+  const rules: SortRule[] = data.rules ?? [];
+  // Migrate old rules that have `pattern` (string) instead of `patterns` (string[])
+  return rules.map((r) => {
+    if (!Array.isArray((r as any).patterns)) {
+      const legacy = r as any;
+      return { ...r, patterns: legacy.pattern ? [legacy.pattern] : [] };
+    }
+    return r;
+  });
 }
 
 export async function setRules(rules: SortRule[]): Promise<void> {
